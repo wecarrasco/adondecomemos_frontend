@@ -1,6 +1,6 @@
 # ¿A Dónde Comemos?
 
-> A Vue.js project
+> Tu solucion a la hora de decidir qué comer.
 
 ## Build Setup
 
