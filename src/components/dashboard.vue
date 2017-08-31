@@ -7,8 +7,8 @@
         </div>
         <form class="navbar-form navbar-center" role="search">
           <div class="form-group">
-            <input type="text" class="form-control barra barra-cerrada" placeholder="Search">
-            <button type="submit" class="btn btn-default boton-search">
+            <input v-model="filtro_busqueda" type="text" class="form-control barra barra-cerrada barra-principal" placeholder="Search">
+            <button v-on:click="buscar" type="submit" class="btn btn-default boton-search">
               <i class="fa fa-search" aria-hidden="true"></i>
             </button>
             <button class="btn btn-default boton-search-avanzado">
@@ -27,17 +27,6 @@
           </div>
         </form>
       </div>
-      <!-- <div class="container-fluid">
-        <div class="form-group navbar-form navbar-center inputs-extra">
-          <input type='text' class='form-control barra input-presupuesto barra-cerrada' placeholder='Presupuesto'>
-          <div class="grupo-extra">
-            <input type='text' class='form-control barra input-presupuesto barra-cerrada' placeholder='Ubicación'>
-            <button class="btn btn-default boton-gps">
-              <i class="fa fa-map-marker" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-      </div> -->
     </nav>
 
     <div class="div-mapa" id="basic_map"></div>
@@ -49,30 +38,88 @@ export default {
   data(){
     return{
       marcadores: [],
-      map
+      map,
+      filtro_busqueda: null
     }
   },methods:{
+    simon:function(){
+      alert("simon")
+    },
     traerRestaurantes:function(){
       this.$http.get("http://localhost:8000/marcadores/restaurantes").then((res)=>{
         var restaurantes = res.body;
         for (var i = 0; i < restaurantes.length; i++) {
           var direcciones = restaurantes[i].Direcciones;
-          for (var i = 0; i < direcciones.length; i++) {
-            this.$http.get("http://localhost:8000/marcadores/direcciones?id="+direcciones[i]).then((res)=>{
+          let nombre = restaurantes[i].Nombre;
+          for (var j = 0; j < direcciones.length; j++) {
+            this.$http.get("http://localhost:8000/marcadores/direcciones?id="+direcciones[j]).then((res)=>{
               var dir = res.body;
-              for (var i = 0; i < dir.length; i++) {
-                let lati = dir[i].Latitud;
-                let lon = dir[i].Longitud;
+              for (var k = 0; k < dir.length; k++) {
+                let lati = dir[k].Latitud;
+                let lon = dir[k].Longitud;
                 this.mapa.addMarker({
                   lat: lati,
                   lng: lon,
-                  title: restaurantes[i].Nombre
+                  title: nombre
                 });
               }
             });
+
           }
         }
       });
+    },
+    buscar:function(event){
+      let _this = this;
+      _this.mapa.removeMarkers();
+      GMaps.geolocate({
+        success: function(position){
+            _this.mapa.setCenter(position.coords.latitude, position.coords.longitude);
+            _this.mapa.addMarker({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            title: "You",
+            icon: "src/assets/marker_you.png"
+          })
+        },error: function(error) {
+          alert('Geolocation failed: '+error.message);
+        },not_supported: function() {
+          alert("Your browser does not support geolocation");
+        }
+      });
+
+      this.$http.get("http://localhost:8000/marcadores/restaurantes").then((res)=>{
+        var restaurantes = res.body;
+        for (var i = 0; i < restaurantes.length; i++) {
+          var direcciones = restaurantes[i].Direcciones;
+          let nombre = restaurantes[i].Nombre;
+          let stringTags = "";
+          let tags = restaurantes[i].Tags;
+          if (typeof tags !== "undefined") {
+            for (var l = 0; l < tags.length; l++) {
+              stringTags += tags[l];
+            }
+          }
+          stringTags += nombre
+          if (stringTags.toUpperCase().indexOf(_this.filtro_busqueda.toUpperCase()) > -1) {
+            for (var j = 0; j < direcciones.length; j++) {
+              this.$http.get("http://localhost:8000/marcadores/direcciones?id="+direcciones[j]).then((res)=>{
+                var dir = res.body;
+                for (var k = 0; k < dir.length; k++) {
+                  let lati = dir[k].Latitud;
+                  let lon = dir[k].Longitud;
+                  this.mapa.addMarker({
+                    lat: lati,
+                    lng: lon,
+                    title: nombre
+                  });
+                }
+              });
+            }
+          }
+        }
+      });
+
     }
   },mounted(){
     var _this = this;
@@ -148,19 +195,35 @@ export default {
       $(".boton-search-avanzado").click(function(){
         if (avanzado === false) {
           for (var i = 0; i < barras.length; i++) {
-            $(barras[i]).animate({width: '+=410px'}, 300);
+            $(barras[i]).animate({width: '+=380px'}, 300);
           }
           $(".navbar").animate({height: '+=80px'}, 200);
           $(".input-presupuesto").css("visibility","visible");
         }else if(avanzado === true){
           for (var i = 0; i < barras.length; i++) {
-            $(barras[i]).animate({width: '-=410px'}, 300);
+            $(barras[i]).animate({width: '-=380px'}, 300);
           }
           $(".navbar").animate({height: '-=80px'}, 200);
           $(".input-presupuesto").css("visibility","hidden");
         };
         avanzado = !avanzado;
       });
+
+      let searchClick = false;
+      $(".barra-principal").focusin(function(){
+        if (avanzado === false && searchClick === false) {
+          $(".barra-principal").animate({width: '+=380px'}, 300);
+        }
+        searchClick = !searchClick;
+      });
+
+      $(".barra-principal").focusout(function(){
+        if (avanzado === false && searchClick === true) {
+          $(".barra-principal").animate({width: '-=380px'}, 300);
+        }
+        searchClick = !searchClick;
+      });
+
 
       $(window).resize(function() {
         //console.log("simon")
