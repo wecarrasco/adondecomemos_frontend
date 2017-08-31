@@ -1,25 +1,25 @@
 db.restaurante.insert({
-"Nombre":"¿Donde Comemos?",
-"Direcciones":"ID",
+"Nombre":"Carnitas La Kennedy",
+"Direcciones":[ObjectId("59a7993be0aa174e840f0b4f")],
 "Menu":["ID", "ID"],
 "Comentarios":["ID", "ID"],
 "Fotos":["http://lorempixel.com/400/200/food/", "http://lorempixel.com/400/200/food/"],
 "Promociones":["ID","ID"],
 "Redes":[{
-  "Facebook":"https://www.facebook.com/dondecomemoshn/",
-  "Correo" : "adondecomemos@gmail.com"}],
+  "Facebook":"https://www.facebook.com/pages/Carnitas-La-Kennedy/263294033731746",
+}],
 "username" : "admin",
 "password" : "admin",
 "cant_favs" : 0,
 //Faltantes en MLab
-"Tags" : ["dondecomemos", "comida", "loquesea", "pity"],
+"Tags" : ["test_dondecomemos", "carne", "sopa","frijoles", "anafre"],
 "Ranking" : "4"
 });
 
 db.direcciones.insert({
-  "Direccion" : "Col. Bella Oriente",
-  "Latitud" : "14.098328",
-  "Longitud" : "-87.203829",
+  "Direccion" : "Col. Kennedy",
+  "Latitud" : "14.064176",
+  "Longitud" : "-87.180572",
   "Telefonos" : ["22332233", "12332155"],
   "Horario" : "Lunes a Viernes - 10am a 5pm"
 });
